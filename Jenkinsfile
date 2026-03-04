@@ -20,13 +20,16 @@ pipeline {
                 echo "Running JUnit tests..."
                 cd "Password Protection"
 
-                # Download JUnit jar if missing or empty
-                if [ ! -s junit-platform-console-standalone.jar ]; then
-                    echo "Downloading JUnit..."
-                    curl -L -o junit-platform-console-standalone.jar https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/1.10.0/junit-platform-console-standalone-1.10.0.jar
+                # Remove any corrupted JUnit jar
+                if [ -f junit-platform-console-standalone.jar ]; then
+                    rm junit-platform-console-standalone.jar
                 fi
 
-                # Verify file exists and is not empty
+                # Download JUnit jar
+                echo "Downloading JUnit..."
+                curl -L -o junit-platform-console-standalone.jar https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/1.10.0/junit-platform-console-standalone-1.10.0.jar
+
+                # Verify file exists and is non-empty
                 if [ ! -s junit-platform-console-standalone.jar ]; then
                     echo "ERROR: Failed to download JUnit jar"
                     exit 1
