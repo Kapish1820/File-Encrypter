@@ -6,8 +6,6 @@ pipeline {
             steps {
                 sh '''
                 echo "Building Java project..."
-                echo "Listing workspace contents:"
-                ls
                 cd "Password Protection"
                 mkdir -p build
                 javac -d build src/*.java
@@ -19,13 +17,19 @@ pipeline {
         stage('Test') {
             steps {
                 sh '''
-                echo "Running JUnit tests for File-Encrypter..."
+                echo "Running JUnit tests..."
                 cd "Password Protection"
 
-                # Download JUnit jar if not already present
-                if [ ! -f junit-platform-console-standalone.jar ]; then
+                # Download JUnit jar if missing or empty
+                if [ ! -s junit-platform-console-standalone.jar ]; then
                     echo "Downloading JUnit..."
                     curl -L -o junit-platform-console-standalone.jar https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/1.10.0/junit-platform-console-standalone-1.10.0.jar
+                fi
+
+                # Verify file exists and is not empty
+                if [ ! -s junit-platform-console-standalone.jar ]; then
+                    echo "ERROR: Failed to download JUnit jar"
+                    exit 1
                 fi
 
                 # Compile test files
@@ -42,12 +46,10 @@ pipeline {
         stage('Deploy') {
             steps {
                 sh '''
-                echo "Deploying (Packaging) File-Encrypter Application..."
+                echo "Deploying application..."
                 cd "Password Protection"
-                
-                # Create executable artifact (JAR)
                 jar cf FileEncrypter.jar -C build .
-                echo "Deployment successful - Artifact ready"
+                echo "Deployment successful"
                 '''
             }
         }
